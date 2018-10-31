@@ -26,29 +26,64 @@ public class ReleModule {
     private static InputStream inputStream;
     private static OutputStream outputStream;
 
-    public static void openConnection(String ip, int port) {
-        if (InetAddresses.isInetAddress(ip)) {
+    public static void output_states() {
+        NetworkManager.writeInSocket(new byte[]{DIGITAL_GET_OUT_CODE});
+        byte[] data = NetworkManager.readInSocket(1);
+        //System.out.println("Relay states: " + String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0'));
+        String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0');
+    }
+    
+    
 
+    protected static class NetworkManager {
+
+        protected static void openConnection(String ip, int port) {
+            if (InetAddresses.isInetAddress(ip)) {
+                try {
+                    //inserire connessione al socket
+                    releSocket = new Socket(ip, port);
+                    inputStream = releSocket.getInputStream();
+                    outputStream = releSocket.getOutputStream();
+                } catch (IOException ex) {
+                    //eccezzione in connessione
+                    Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                //connessione non riuscita
+            }
+        }
+
+        protected static void closeConnection() {
             try {
-                //inserire connessione al socket
-                releSocket = new Socket(ip, port);
-                inputStream = releSocket.getInputStream();
-                outputStream = releSocket.getOutputStream();
+                outputStream.write(new byte[]{LOG_OUT_CODE});
+                outputStream.close();
+                inputStream.close();
             } catch (IOException ex) {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else {
-           //connessione non riuscita
         }
-    }
 
-    public static void closeConnection() {
-        try {
-            outputStream.write(new byte[]{LOG_OUT_CODE});
-            outputStream.close();
-            inputStream.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
+        protected static void writeInSocket(byte msg[]) {
+            try {
+                outputStream.write(msg);
+            } catch (IOException ex) {
+                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        protected static byte[] readInSocket(int count) {
+            byte[] data = new byte[32];
+            try {
+                inputStream.read(data, 0, count);
+            } catch (IOException ex) {
+                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NullPointerException e) {
+                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, e);
+            } catch (IndexOutOfBoundsException e) {
+                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, e);
+            }
+
+            return data;
         }
     }
 
