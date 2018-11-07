@@ -7,6 +7,7 @@ package library;
 
 import com.google.common.net.InetAddresses;
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,8 @@ import java.util.logging.Logger;
  * @author samuPC
  */
 public class ReleModule {
+
+    private final static byte RELE_CODE = 0x01;
 
     private final static byte DIGITAL_ACTIVE_CODE = 0x20;
     private final static byte DIGITAL_INACTIVE_CODE = 0x21;
@@ -32,8 +35,45 @@ public class ReleModule {
         //System.out.println("Relay states: " + String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0'));
         String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0');
     }
-    
-    
+
+    public static void startConnection(String ip) {
+        NetworkManager.openConnection(ip, 17494);
+    }
+
+    public static String accensione() {
+        byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, 0};
+        NetworkManager.writeInSocket(w);
+
+        
+        //non corretto
+        byte[] result = NetworkManager.readInSocket(1);
+        
+        StringBuilder builder = new StringBuilder();
+        
+        for (byte r : result) {
+            String re = String.valueOf(r);
+            builder.append(Integer.parseInt(re, 16));
+        }
+        
+        return builder.toString();
+    }
+
+    public static String spegimento() {
+        byte[] w = new byte[]{DIGITAL_INACTIVE_CODE, RELE_CODE, 0};
+        NetworkManager.writeInSocket(w);
+
+        //non corretto
+        byte[] result = NetworkManager.readInSocket(1);
+        
+        StringBuilder builder = new StringBuilder();
+        
+        for (byte r : result) {
+            String re = String.valueOf(r);
+            builder.append(Integer.parseInt(re, 16));
+        }
+        
+        return builder.toString();
+    }
 
     protected static class NetworkManager {
 

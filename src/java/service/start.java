@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import library.ReleModule;
 
 /**
  *
@@ -37,12 +38,17 @@ public class start extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet start</title>");            
+            out.println("<title>Servlet start</title>");
             out.println("</head>");
             out.println("<body>");
             out.println("<h1>Servlet start at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
+
+            String ip = "192.168.0.200";
+            ReleModule.startConnection(ip);
+            ReleModule.spegimento();
+
         }
     }
 
