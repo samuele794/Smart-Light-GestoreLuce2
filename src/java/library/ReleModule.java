@@ -108,6 +108,7 @@ public class ReleModule {
         protected static void writeInSocket(byte msg[]) {
             try {
                 outputStream.write(msg);
+                outputStream.flush();
             } catch (IOException ex) {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
             }
