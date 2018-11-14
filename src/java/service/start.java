@@ -5,6 +5,7 @@
  */
 package service;
 
+import beans.Erroring;
 import beans.LampadinaStatus;
 import beans.StatusObject;
 import com.google.gson.Gson;
@@ -35,22 +36,36 @@ public class start extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        response.setContentType("application/json");
+        //try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             Gson gson= new Gson();
-            String ip = "192.168.0.200";
-            StatusObject status = ReleModule.startConnection(ip);
             
-            ReleModule.accensione();
+            int tentative = 0;
+            StatusObject status;
+            do{
+                status = ReleModule.startConnection();
+                if(!status.isException()){
+                    break;
+                }
+                tentative++;
+            }while(tentative>3);
             
-            if (!status.isException()) {
-                out.print(gson.toJson(new LampadinaStatus("Lamp")));
-                return;
+            if(status.isException()){
+                Erroring e= new Erroring(status.getMessage());
+                String error = gson.toJson(e);
+                response.getOutputStream().print(error);
             }
+            
+           // ReleModule.output_states();
+            
+            //if (!status.isException()) {
+            //    out.print(gson.toJson(new LampadinaStatus("Lamp")));
+            //    return;
+           // }
             //ReleModule.spegimento();
 
-        }
+        //}
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

@@ -22,7 +22,7 @@ public class StatusObject {
     public void setException(boolean exception) {
         this.exception = exception;
     }
-
+    
     public String getMessage() {
         return message;
     }

@@ -5,6 +5,7 @@
  */
 package library;
 
+import beans.LampadinaStatus;
 import beans.StatusObject;
 import com.google.common.net.InetAddresses;
 import exception.IPException;
@@ -19,6 +20,8 @@ import javax.imageio.IIOException;
  * @author samuPC
  */
 public class ReleModule {
+    
+    private static String ip = "192.168.0.200";
 
     private final static byte RELE_CODE = 0x01;
 
@@ -31,11 +34,11 @@ public class ReleModule {
     private static InputStream inputStream;
     private static OutputStream outputStream;
 
-    public static StatusObject startConnection(String ip) {
+    public static StatusObject startConnection() {
         try {
             NetworkManager.openConnection(ip, 17494);
         } catch (IOException ex) {
-            return new StatusObject("Problema di connessione al relè", true);
+            return new StatusObject("Problema di connessione al rele", true);
         } catch (IPException ex) {
             return new StatusObject(ex.getMessage(), true);
         }
@@ -55,7 +58,10 @@ public class ReleModule {
         NetworkManager.writeInSocket(w);
     }
 
-    public static String output_states() {
+    //1: rele 1 acceso
+    //2: rele 2 acceso
+    //3: rele 1+2 acceso
+    public static LampadinaStatus output_states() {
         NetworkManager.writeInSocket(new byte[]{DIGITAL_GET_OUT_CODE});
         try {
             Thread.sleep(2000);
@@ -63,8 +69,17 @@ public class ReleModule {
             Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
         }
         byte[] data = NetworkManager.readInSocket(1);
-        //System.out.println("Relay states: " + String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0'));
-        return String.valueOf(data);
+
+        if (((int) data[0]) == 0) {
+            return new LampadinaStatus("0");
+        } else {
+            //rele 1 accesso
+            return new LampadinaStatus("1");
+        }
+    }
+    
+    public boolean getConnection(){
+        return releSocket.isConnected();
     }
 
     protected static class NetworkManager {
@@ -99,9 +114,8 @@ public class ReleModule {
         }
 
         protected static byte[] readInSocket(int count) {
-            byte[] data = new byte[2];
+            byte[] data = new byte[1];
 
-            //for (int x = 0; x < count; x++) {
             try {
                 inputStream.read(data);
             } catch (IOException ex) {
@@ -111,7 +125,6 @@ public class ReleModule {
             } catch (IndexOutOfBoundsException e) {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, e);
             }
-            //}
 
             return data;
         }
