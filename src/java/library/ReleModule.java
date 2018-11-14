@@ -5,12 +5,14 @@
  */
 package library;
 
+import beans.StatusObject;
 import com.google.common.net.InetAddresses;
+import exception.IPException;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.IIOException;
 
 /**
  *
@@ -29,67 +31,52 @@ public class ReleModule {
     private static InputStream inputStream;
     private static OutputStream outputStream;
 
-    public static void output_states() {
-        NetworkManager.writeInSocket(new byte[]{DIGITAL_GET_OUT_CODE});
-        byte[] data = NetworkManager.readInSocket(1);
-        //System.out.println("Relay states: " + String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0'));
-        String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0');
-    }
-
-    public static void startConnection(String ip) {
-        NetworkManager.openConnection(ip, 17494);
-    }
-
-    public static String accensione() {
-        byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, 0};
-        NetworkManager.writeInSocket(w);
-
-        
-        //non corretto
-        byte[] result = NetworkManager.readInSocket(1);
-        
-        StringBuilder builder = new StringBuilder();
-        
-        for (byte r : result) {
-            String re = String.valueOf(r);
-            builder.append(Integer.parseInt(re, 16));
+    public static StatusObject startConnection(String ip) {
+        try {
+            NetworkManager.openConnection(ip, 17494);
+        } catch (IOException ex) {
+            return new StatusObject("Problema di connessione al relè", true);
+        } catch (IPException ex) {
+            return new StatusObject(ex.getMessage(), true);
         }
-        
-        return builder.toString();
+        return new StatusObject("OK", false);
     }
 
-    public static String spegimento() {
+    public static void accensione() {
+        if (releSocket != null) {
+            byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, 0};
+            NetworkManager.writeInSocket(w);
+        }
+
+    }
+
+    public static void spegimento() {
         byte[] w = new byte[]{DIGITAL_INACTIVE_CODE, RELE_CODE, 0};
         NetworkManager.writeInSocket(w);
+    }
 
-        //non corretto
-        byte[] result = NetworkManager.readInSocket(1);
-        
-        StringBuilder builder = new StringBuilder();
-        
-        for (byte r : result) {
-            String re = String.valueOf(r);
-            builder.append(Integer.parseInt(re, 16));
+    public static String output_states() {
+        NetworkManager.writeInSocket(new byte[]{DIGITAL_GET_OUT_CODE});
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        return builder.toString();
+        byte[] data = NetworkManager.readInSocket(1);
+        //System.out.println("Relay states: " + String.format("%8s", Integer.toBinaryString((data[0] & 0xFF))).replace(' ', '0'));
+        return String.valueOf(data);
     }
 
     protected static class NetworkManager {
 
-        protected static void openConnection(String ip, int port) {
+        protected static void openConnection(String ip, int port) throws IOException, IPException {
             if (InetAddresses.isInetAddress(ip)) {
-                try {
-                    //inserire connessione al socket
-                    releSocket = new Socket(ip, port);
-                    inputStream = releSocket.getInputStream();
-                    outputStream = releSocket.getOutputStream();
-                } catch (IOException ex) {
-                    //eccezzione in connessione
-                    Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                //inserire connessione al socket
+                releSocket = new Socket(ip, port);
+                inputStream = releSocket.getInputStream();
+                outputStream = releSocket.getOutputStream();
             } else {
-                //connessione non riuscita
+                new IPException(IPException.IP_ERROR_MESSAGE);
             }
         }
 
@@ -112,9 +99,11 @@ public class ReleModule {
         }
 
         protected static byte[] readInSocket(int count) {
-            byte[] data = new byte[32];
+            byte[] data = new byte[2];
+
+            //for (int x = 0; x < count; x++) {
             try {
-                inputStream.read(data, 0, count);
+                inputStream.read(data);
             } catch (IOException ex) {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NullPointerException e) {
@@ -122,6 +111,7 @@ public class ReleModule {
             } catch (IndexOutOfBoundsException e) {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, e);
             }
+            //}
 
             return data;
         }

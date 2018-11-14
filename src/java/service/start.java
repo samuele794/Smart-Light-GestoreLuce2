@@ -5,6 +5,9 @@
  */
 package service;
 
+import beans.LampadinaStatus;
+import beans.StatusObject;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -18,7 +21,7 @@ import library.ReleModule;
  *
  * @author samuPC
  */
-@WebServlet(name = "start", urlPatterns = {"/start"})
+@WebServlet(name = "switch", urlPatterns = {"/switch"})
 public class start extends HttpServlet {
 
     /**
@@ -32,22 +35,20 @@ public class start extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("application/json;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet start</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet start at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-
+            Gson gson= new Gson();
             String ip = "192.168.0.200";
-            ReleModule.startConnection(ip);
-            ReleModule.spegimento();
+            StatusObject status = ReleModule.startConnection(ip);
+            
+            ReleModule.accensione();
+            
+            if (!status.isException()) {
+                out.print(gson.toJson(new LampadinaStatus("Lamp")));
+                return;
+            }
+            //ReleModule.spegimento();
 
         }
     }
