@@ -78,7 +78,7 @@ public class ReleModule {
         }
     }
     
-    public boolean getConnection(){
+    public static boolean isConnected(){
         return releSocket.isConnected();
     }
 

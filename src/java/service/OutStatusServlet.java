@@ -22,8 +22,8 @@ import library.ReleModule;
  *
  * @author samuPC
  */
-@WebServlet(name = "Switch", urlPatterns = {"/Switch"})
-public class Switch extends HttpServlet {
+@WebServlet(name = "OutputState", urlPatterns = {"/OutputState"})
+public class OutStatusServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,42 +37,32 @@ public class Switch extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json");
-        //try (PrintWriter out = response.getWriter()) {
-        /* TODO output your page here. You may use following sample code. */
+
         Gson gson = new Gson();
 
-        int tentative = 0;
-        StatusObject status;
-        do {
-            status = ReleModule.startConnection();
-            if (!status.isException()) {
-                break;
-            }
-            tentative++;
-        } while (tentative > 3);
-
-        if (status.isException()) {
-            Erroring e = new Erroring(status.getMessage());
-            String error = gson.toJson(e);
-            response.getOutputStream().print(error);
+        if (ReleModule.isConnected()) {
+            
         } else {
-            LampadinaStatus statusLampadina = ReleModule.output_states();
-            if (statusLampadina.getStatusLampadina().equals("0")) {
-                ReleModule.accensione();
-            }else{
-                ReleModule.spegimento();
+            int tentative = 0;
+            StatusObject status;
+            do {
+                status = ReleModule.startConnection();
+                if (!status.isException()) {
+                    break;
+                }
+                tentative++;
+            } while (tentative > 3);
+
+            if (status.isException()) {
+                Erroring e = new Erroring(status.getMessage());
+                String error = gson.toJson(e);
+                response.getOutputStream().print(error);
+            } else {
+                
+                
             }
-            LampadinaStatus statusLampadinaReturn = ReleModule.output_states();
-            String statusString = gson.toJson(statusLampadinaReturn);
-            response.getOutputStream().print(statusString);
         }
 
-        //if (!status.isException()) {
-        //    out.print(gson.toJson(new LampadinaStatus("Lamp")));
-        //    return;
-        // }
-        //ReleModule.spegimento();
-        //}
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
