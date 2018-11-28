@@ -22,7 +22,7 @@ import library.ReleModule;
  *
  * @author samuPC
  */
-@WebServlet(name = "Switch", urlPatterns = {"/Switch"})
+@WebServlet(name = "switch", urlPatterns = {"/switch"})
 public class SwitchServlet extends HttpServlet {
 
     /**
@@ -63,7 +63,8 @@ public class SwitchServlet extends HttpServlet {
                 response.getOutputStream().print(statusString);
             }
         }
-
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
     }
 
     private LampadinaStatus switching() {
