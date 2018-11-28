@@ -49,6 +49,7 @@ public class ReleModule {
         if (releSocket != null) {
             byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, 0};
             NetworkManager.writeInSocket(w);
+            NetworkManager.readAvot();
         }
 
     }
@@ -56,6 +57,7 @@ public class ReleModule {
     public static void spegimento() {
         byte[] w = new byte[]{DIGITAL_INACTIVE_CODE, RELE_CODE, 0};
         NetworkManager.writeInSocket(w);
+        NetworkManager.readAvot();
     }
 
     //1: rele 1 acceso
@@ -79,7 +81,11 @@ public class ReleModule {
     }
     
     public static boolean isConnected(){
-        return releSocket.isConnected();
+        if(releSocket != null){
+            return releSocket.isConnected();
+        }else{
+            return false;
+        }
     }
 
     protected static class NetworkManager {
@@ -112,8 +118,21 @@ public class ReleModule {
             } catch (IOException ex) {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
             }
+       
+            
         }
 
+        protected static void readAvot(){
+            try {
+                Thread.sleep(1000);
+                inputStream.read(new byte[1]);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
         protected static byte[] readInSocket(int count) {
             byte[] data = new byte[1];
 
