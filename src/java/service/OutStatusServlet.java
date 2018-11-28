@@ -41,7 +41,8 @@ public class OutStatusServlet extends HttpServlet {
         Gson gson = new Gson();
 
         if (ReleModule.isConnected()) {
-            
+            String statusString = gson.toJson(ReleModule.output_states());
+            response.getOutputStream().print(statusString);
         } else {
             int tentative = 0;
             StatusObject status;
@@ -58,10 +59,13 @@ public class OutStatusServlet extends HttpServlet {
                 String error = gson.toJson(e);
                 response.getOutputStream().print(error);
             } else {
-                
-                
+                String statusString = gson.toJson(ReleModule.output_states());
+                response.getOutputStream().print(statusString);
             }
         }
+
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
 
     }
 
