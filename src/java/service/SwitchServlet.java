@@ -10,7 +10,6 @@ import beans.LampadinaStatus;
 import beans.StatusObject;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -37,32 +36,38 @@ public class SwitchServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json");
-
         Gson gson = new Gson();
 
-        if (ReleModule.isConnected()) {
-            String statusString = gson.toJson(switching());
-            response.getOutputStream().print(statusString);
-        } else {
-            int tentative = 0;
-            StatusObject status;
-            do {
-                status = ReleModule.startConnection();
-                if (!status.isException()) {
-                    break;
-                }
-                tentative++;
-            } while (tentative > 3);
-
-            if (status.isException()) {
-                Erroring e = new Erroring(status.getMessage());
-                String error = gson.toJson(e);
-                response.getOutputStream().print(error);
-            } else {
+        if (request.getQueryString() == null) {
+            if (ReleModule.isConnected()) {
                 String statusString = gson.toJson(switching());
                 response.getOutputStream().print(statusString);
+            } else {
+                int tentative = 0;
+                StatusObject status;
+                do {
+                    status = ReleModule.startConnection();
+                    if (!status.isException()) {
+                        break;
+                    }
+                    tentative++;
+                } while (tentative > 3);
+
+                if (status.isException()) {
+                    Erroring e = new Erroring(status.getMessage());
+                    String error = gson.toJson(e);
+                    response.getOutputStream().print(error);
+                } else {
+                    String statusString = gson.toJson(switching());
+                    response.getOutputStream().print(statusString);
+                }
             }
+        }else{
+            Erroring e = new Erroring("Parametri non conformi");
+            String error = gson.toJson(e);
+            response.getOutputStream().print(error);
         }
+
         response.getOutputStream().flush();
         response.getOutputStream().close();
     }

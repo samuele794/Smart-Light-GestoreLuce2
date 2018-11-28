@@ -13,7 +13,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.IIOException;
 
 /**
  *
@@ -37,12 +36,14 @@ public class ReleModule {
     public static StatusObject startConnection() {
         try {
             NetworkManager.openConnection(ip, 17494);
+            return new StatusObject("OK", false);
         } catch (IOException ex) {
             return new StatusObject("Problema di connessione al rele", true);
         } catch (IPException ex) {
             return new StatusObject(ex.getMessage(), true);
         }
-        return new StatusObject("OK", false);
+        
+        
     }
 
     public static void accensione() {
@@ -66,7 +67,7 @@ public class ReleModule {
     public static LampadinaStatus output_states() {
         NetworkManager.writeInSocket(new byte[]{DIGITAL_GET_OUT_CODE});
         try {
-            Thread.sleep(2000);
+            Thread.sleep(100);
         } catch (InterruptedException ex) {
             Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -97,7 +98,7 @@ public class ReleModule {
                 inputStream = releSocket.getInputStream();
                 outputStream = releSocket.getOutputStream();
             } else {
-                new IPException(IPException.IP_ERROR_MESSAGE);
+                throw new IPException(IPException.IP_ERROR_MESSAGE);
             }
         }
 
@@ -124,7 +125,7 @@ public class ReleModule {
 
         protected static void readAvot(){
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 inputStream.read(new byte[1]);
             } catch (InterruptedException ex) {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);

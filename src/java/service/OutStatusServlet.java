@@ -40,28 +40,35 @@ public class OutStatusServlet extends HttpServlet {
 
         Gson gson = new Gson();
 
-        if (ReleModule.isConnected()) {
-            String statusString = gson.toJson(ReleModule.output_states());
-            response.getOutputStream().print(statusString);
-        } else {
-            int tentative = 0;
-            StatusObject status;
-            do {
-                status = ReleModule.startConnection();
-                if (!status.isException()) {
-                    break;
-                }
-                tentative++;
-            } while (tentative > 3);
+        if (request.getQueryString() == null) {
 
-            if (status.isException()) {
-                Erroring e = new Erroring(status.getMessage());
-                String error = gson.toJson(e);
-                response.getOutputStream().print(error);
-            } else {
+            if (ReleModule.isConnected()) {
                 String statusString = gson.toJson(ReleModule.output_states());
                 response.getOutputStream().print(statusString);
+            } else {
+                int tentative = 0;
+                StatusObject status;
+                do {
+                    status = ReleModule.startConnection();
+                    if (!status.isException()) {
+                        break;
+                    }
+                    tentative++;
+                } while (tentative > 3);
+
+                if (status.isException()) {
+                    Erroring e = new Erroring(status.getMessage());
+                    String error = gson.toJson(e);
+                    response.getOutputStream().print(error);
+                } else {
+                    String statusString = gson.toJson(ReleModule.output_states());
+                    response.getOutputStream().print(statusString);
+                }
             }
+        } else {
+            Erroring e = new Erroring("Parametri non conformi");
+            String error = gson.toJson(e);
+            response.getOutputStream().print(error);
         }
 
         response.getOutputStream().flush();
