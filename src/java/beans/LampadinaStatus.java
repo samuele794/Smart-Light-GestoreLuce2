@@ -1,10 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package beans;
 
+/**
+ * Classe beans per l'output della lampadina
+ * @author samuPC
+ */
 public class LampadinaStatus {
 
     private String statusLampadina;

@@ -6,7 +6,7 @@
 package beans;
 
 /**
- *
+ * Classe beans per gli errori
  * @author samuPC
  */
 public class Erroring {

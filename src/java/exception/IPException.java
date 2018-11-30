@@ -6,7 +6,7 @@
 package exception;
 
 /**
- *
+ * Classe per l'eccezzione da ip non valido
  * @author samuPC
  */
 public class IPException extends Exception{

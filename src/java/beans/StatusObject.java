@@ -7,26 +7,42 @@ package beans;
 
 public class StatusObject {
 
-    private String message;    //messaggio
-    private boolean exception;	//eccezzione 
+    private String message;    //messaggio, può essere d'errore o di OK
+    private boolean exception;	//controllo se il messaggio è di eccezzione  
 
     public StatusObject(String message, boolean exception) {
         this.message = message;
         this.exception = exception;
-    }			//costruttore
+    }
 
+    /**
+     * Ritorna è stata scaturia un eccezzione
+     * @return 
+     */
     public boolean isException() {
         return exception;
-    }			//ritorna l'eccezzione
+    }
 
+    /**
+     * Setta se è stata scaturita un eccezzione
+     * @param exception 
+     */
     public void setException(boolean exception) {
         this.exception = exception;
-    }			//setta l'eccezzione
+    }
     
+    /**
+     * Metodo per ottenere il messaggio
+     * @return 
+     */
     public String getMessage() {
         return message;
-    }			//ritorna il messaggio
-
+    }
+    
+    /**
+     * Metodo per settare il messaggio
+     * @param error 
+     */
     public void setMessage(String error) {
         this.message = message;
     }		//setta il messaggio
