@@ -7,22 +7,32 @@ package beans;
 
 /**
  * Classe beans per gli errori
+ *
  * @author samuPC
  */
 public class Erroring {
 
-    private String error;
-    
-    public Erroring(String error){
-        setError(error);
+    private String id = "1";
+    private String message;
+
+    public Erroring(String message) {
+        setError(message);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getError() {
-        return error;
+        return message;
     }
 
-    public void setError(String error) {
-        this.error = error;
+    public void setError(String message) {
+        this.message = message;
     }
 
 }

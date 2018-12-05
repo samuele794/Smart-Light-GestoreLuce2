@@ -61,6 +61,19 @@ public class ReleModule {
 
     }
     /**
+     * Metoto per dare un solo impulso al rele. La risoluzione di impulso è di 100ms (quindi 10 = 1000ms = 1s)
+     * @param time tempo di impulso
+     */
+    public static void pulseOn(int time) {
+        if (releSocket != null) {
+            byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, (byte)time};
+            NetworkManager.writeInSocket(w);
+            NetworkManager.readAvot();
+        }
+
+    }
+    
+    /**
      * Comando per spegnere il rele
      */
     public static void spegimento() {
