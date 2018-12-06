@@ -8,10 +8,10 @@ package beans;
 public class LampadinaStatus {
 
     private String id = "1";
-    private String status;
+    private String statusLampadina;
 
-    public LampadinaStatus(String status) {
-        this.status = status;
+    public LampadinaStatus(String statusLampadina) {
+        this.statusLampadina = statusLampadina;
     }
 
     public String getId() {
@@ -23,11 +23,11 @@ public class LampadinaStatus {
     }
 
     public String getStatusLampadina() {
-        return status;
+        return statusLampadina;
     }
 
     public void setStatusLampadina(String statusLampadina) {
-        this.status = status;
+        this.statusLampadina = statusLampadina;
     }
 
 }

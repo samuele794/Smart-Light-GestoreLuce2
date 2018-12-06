@@ -159,14 +159,20 @@ public class ReleModule {
          * @param msg array di byte da scrivere nel socket
          */
         protected static void writeInSocket(byte msg[]) {
+            int tentative = 0;
             try {
                 outputStream.write(msg);
                 outputStream.flush();
             } catch (IOException ex) {
-                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
-            }
-       
-            
+               ReleModule.startConnection();
+                try {
+                    outputStream.write(msg);
+                    outputStream.flush();
+                } catch (IOException ex1) {
+                    Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+                
+            }            
         }
         
         /**

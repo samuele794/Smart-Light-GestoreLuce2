@@ -13,10 +13,10 @@ package beans;
 public class Erroring {
 
     private String id = "1";
-    private String message;
+    private String error;
 
-    public Erroring(String message) {
-        setError(message);
+    public Erroring(String error) {
+        setError(error);
     }
 
     public String getId() {
@@ -28,11 +28,11 @@ public class Erroring {
     }
 
     public String getError() {
-        return message;
+        return error;
     }
 
-    public void setError(String message) {
-        this.message = message;
+    public void setError(String error) {
+        this.error = error;
     }
 
 }
