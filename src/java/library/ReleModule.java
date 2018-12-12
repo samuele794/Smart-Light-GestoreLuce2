@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * @author samuPC
  */
 public class ReleModule {
-    
+
     private static String ip = "192.168.0.200"; //Indirizzo ip rele
 
     private final static byte RELE_CODE = 0x01; //codice della porta 1 del rele
@@ -32,10 +32,11 @@ public class ReleModule {
     private static Socket releSocket;
     private static InputStream inputStream;
     private static OutputStream outputStream;
-    
+
     /**
      * Metodo per attivare la connessione con il rele
-     * @return 
+     *
+     * @return
      */
     public static StatusObject startConnection() {
         try {
@@ -46,13 +47,19 @@ public class ReleModule {
         } catch (IPException ex) {
             return new StatusObject(ex.getMessage(), true);
         }
-        
-        
+
     }
+    
+    public static void disconnect(){
+        releSocket = null;
+        inputStream = null;
+        outputStream = null;
+    }
+
     /**
      * Comando per accendere il rele
      */
-    public static void accensione() {
+    public static void accensione() throws IOException {
         if (releSocket != null) {
             byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, 0};
             NetworkManager.writeInSocket(w);
@@ -60,23 +67,26 @@ public class ReleModule {
         }
 
     }
+
     /**
-     * Metoto per dare un solo impulso al rele. La risoluzione di impulso è di 100ms (quindi 10 = 1000ms = 1s)
+     * Metoto per dare un solo impulso al rele. La risoluzione di impulso è di
+     * 100ms (quindi 10 = 1000ms = 1s)
+     *
      * @param time tempo di impulso
      */
-    public static void pulseOn(int time) {
+    public static void pulseOn(int time) throws IOException {
         if (releSocket != null) {
-            byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, (byte)time};
+            byte[] w = new byte[]{DIGITAL_ACTIVE_CODE, RELE_CODE, (byte) time};
             NetworkManager.writeInSocket(w);
             NetworkManager.readAvot();
         }
 
     }
-    
+
     /**
      * Comando per spegnere il rele
      */
-    public static void spegimento() {
+    public static void spegimento() throws IOException {
         byte[] w = new byte[]{DIGITAL_INACTIVE_CODE, RELE_CODE, 0};
         NetworkManager.writeInSocket(w);
         NetworkManager.readAvot();
@@ -85,12 +95,12 @@ public class ReleModule {
     //1: rele 1 acceso
     //2: rele 2 acceso
     //3: rele 1+2 acceso
-    
     /**
      * Comando per ottenere lo stato attuale del rele 1
-     * @return 
+     *
+     * @return
      */
-    public static LampadinaStatus output_states() {
+    public static LampadinaStatus output_states() throws IOException {
         NetworkManager.writeInSocket(new byte[]{DIGITAL_GET_OUT_CODE});
         try {
             Thread.sleep(100);
@@ -106,19 +116,20 @@ public class ReleModule {
             return new LampadinaStatus("1");
         }
     }
-    
+
     /**
      * Controllo se siamo connessi al rele
-     * @return 
+     *
+     * @return
      */
-    public static boolean isConnected(){
-        if(releSocket != null){
+    public static boolean isConnected() {
+        if (releSocket != null) {
             return releSocket.isConnected();
-        }else{
+        } else {
             return false;
         }
     }
-    
+
     /**
      * Classe base per gestire la connessione con il socket, leggere e scrivere
      */
@@ -126,6 +137,7 @@ public class ReleModule {
 
         /**
          * Metodo per aprire la connessione con il socket
+         *
          * @param ip indirizzo ip del rele
          * @param port porta finale del rele
          * @throws IOException Connessione non istaurata con successo
@@ -141,7 +153,7 @@ public class ReleModule {
                 throw new IPException(IPException.IP_ERROR_MESSAGE);
             }
         }
-        
+
         /**
          * Metodo per chiedere la connessione con il socket
          */
@@ -154,32 +166,26 @@ public class ReleModule {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
         /**
          * Metodo per scrivere sul socket
+         *
          * @param msg array di byte da scrivere nel socket
          */
-        protected static void writeInSocket(byte msg[]) {
+        protected static void writeInSocket(byte msg[]) throws IOException {
             int tentative = 0;
-            try {
                 outputStream.write(msg);
                 outputStream.flush();
-            } catch (IOException ex) {
-               ReleModule.startConnection();
-                try {
-                    outputStream.write(msg);
-                    outputStream.flush();
-                } catch (IOException ex1) {
-                    Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex1);
-                }
-                
-            }            
+           
+
+            
         }
-        
+
         /**
-         * Metodo per una lettura a vuoto dell'output.
-         * Da usare dopo un'azione di switch per l'accensione o lo spegnimento
+         * Metodo per una lettura a vuoto dell'output. Da usare dopo un'azione
+         * di switch per l'accensione o lo spegnimento
          */
-        protected static void readAvot(){
+        protected static void readAvot() {
             try {
                 Thread.sleep(100);
                 inputStream.read(new byte[1]);
@@ -189,24 +195,17 @@ public class ReleModule {
                 Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
+
         /**
          * Metodo per leggere i dati in arrivo dal socket
+         *
          * @param count numero di bite da leggere
          * @return array di byte ricevuti
          */
-        protected static byte[] readInSocket(int count) {
+        protected static byte[] readInSocket(int count) throws IOException {
             byte[] data = new byte[count];
 
-            try {
-                inputStream.read(data);
-            } catch (IOException ex) {
-                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NullPointerException e) {
-                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, e);
-            } catch (IndexOutOfBoundsException e) {
-                Logger.getLogger(ReleModule.class.getName()).log(Level.SEVERE, null, e);
-            }
+            inputStream.read(data);
 
             return data;
         }

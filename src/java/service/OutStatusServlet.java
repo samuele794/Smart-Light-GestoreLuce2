@@ -11,6 +11,8 @@ import beans.StatusObject;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -43,7 +45,15 @@ public class OutStatusServlet extends HttpServlet {
         if (request.getQueryString() == null) {
 
             if (ReleModule.isConnected()) {
-                String statusString = gson.toJson(ReleModule.output_states());
+                String statusString = null;
+                try {
+                    statusString = gson.toJson(ReleModule.output_states());
+                } catch (IOException ex) {
+                    ReleModule.disconnect();
+                    Erroring e = new Erroring("Problemi di connessione, riprovare");
+                    String error = gson.toJson(e);
+                    response.getOutputStream().print(error);
+                }
                 response.getOutputStream().print(statusString);
             } else {
                 int tentative = 0;
@@ -61,7 +71,16 @@ public class OutStatusServlet extends HttpServlet {
                     String error = gson.toJson(e);
                     response.getOutputStream().print(error);
                 } else {
-                    String statusString = gson.toJson(ReleModule.output_states());
+                    String statusString = null;
+                    try {
+                        statusString = gson.toJson(ReleModule.output_states());
+                    } catch (IOException ex) {
+                        ReleModule.disconnect();
+                        Erroring e = new Erroring("Problemi di connessione, riprovare");
+                        String error = gson.toJson(e);
+                        response.getOutputStream().print(error);
+                        
+                    }
                     response.getOutputStream().print(statusString);
                 }
             }

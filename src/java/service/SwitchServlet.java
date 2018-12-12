@@ -40,7 +40,16 @@ public class SwitchServlet extends HttpServlet {
 
         if (request.getQueryString() == null) {
             if (ReleModule.isConnected()) {
-                String statusString = gson.toJson(switching());
+                String statusString = null;
+                try {
+                    statusString = gson.toJson(switching());
+                } catch (IOException ex) {
+                    ReleModule.disconnect();
+                    Erroring e = new Erroring("Problemi di connessione, riprovare");
+                    String error = gson.toJson(e);
+                    response.getOutputStream().print(error);
+
+                }
                 response.getOutputStream().print(statusString);
             } else {
                 int tentative = 0;
@@ -58,11 +67,21 @@ public class SwitchServlet extends HttpServlet {
                     String error = gson.toJson(e);
                     response.getOutputStream().print(error);
                 } else {
-                    String statusString = gson.toJson(switching());
+                    String statusString = null;
+                    try {
+                        statusString = gson.toJson(switching());
+
+                    } catch (IOException ex) {
+                        ReleModule.disconnect();
+                        Erroring e = new Erroring("Problemi di connessione, riprovare");
+                        String error = gson.toJson(e);
+                        response.getOutputStream().print(error);
+                    }
                     response.getOutputStream().print(statusString);
+
                 }
             }
-        }else{
+        } else {
             Erroring e = new Erroring("Parametri non conformi");
             String error = gson.toJson(e);
             response.getOutputStream().print(error);
@@ -72,7 +91,7 @@ public class SwitchServlet extends HttpServlet {
         response.getOutputStream().close();
     }
 
-    private LampadinaStatus switching() {
+    private LampadinaStatus switching() throws IOException {
         LampadinaStatus statusLampadina = ReleModule.output_states();
         if (statusLampadina.getStatusLampadina().equals("0")) {
             ReleModule.accensione();
